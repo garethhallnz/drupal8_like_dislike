@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @file
+ * like_dislike module file.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function like_dislike_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.like_dislike':
+      $output = '';
+      $output .= '<h3>' . t('like_dislike') . '</h3>';
+      $output .= '<p>' . t('like_dislike.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function like_dislike_page_attachments(array &$attachments) {
+  /*$attachments['#attached']['library'][] = 'imagefield_slideshow/imagefield_slideshow';*/
+}
+
+/**
+ * Implements hook_theme().
+ */
+function like_dislike_theme() {
+  return array(
+    'like_dislike' => array(
+      'variables' => array(
+        'likes' => NULL,
+        'dislikes' => NULL,
+        'like_url' => NULL,
+        'dislike_url' => NULL,
+      ),
+    ),
+  );
+}
