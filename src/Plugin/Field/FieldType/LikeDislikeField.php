@@ -40,6 +40,11 @@ class LikeDislikeField extends FieldItemBase {
           'length' => 256,
           'not null' => FALSE,
         ),
+        'clicked_by' => array(
+          'type' => 'blob',
+          'size' => 'big',
+          'not null' => FALSE,
+        ),
       ),
     );
 
@@ -53,7 +58,9 @@ class LikeDislikeField extends FieldItemBase {
     $properties['likes'] = DataDefinition::create('string')
       ->setLabel(t('likes label'));
     $properties['dislikes'] = DataDefinition::create('string')
-      ->setLabel(t('likes label'));
+      ->setLabel(t('dislikes label'));
+    $properties['clicked_by'] = DataDefinition::create('string')
+      ->setLabel(t('clicked by label'));
 
     return $properties;
   }

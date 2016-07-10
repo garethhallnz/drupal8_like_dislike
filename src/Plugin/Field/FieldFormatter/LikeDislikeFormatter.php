@@ -88,6 +88,7 @@ class LikeDislikeFormatter extends FormatterBase {
       '#dislike_url' => $dislike_url,
     ];
 
+    $elements['#cache']['max-age'] = 0;
     return $elements;
   }
 

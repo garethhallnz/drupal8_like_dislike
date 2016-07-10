@@ -7,6 +7,8 @@
 
 namespace Drupal\like_dislike\Controller;
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Controller\ControllerBase;
 
 /**
@@ -21,29 +23,33 @@ class LikeDislikeController extends ControllerBase {
    */
   public function handler($clicked, $data) {
     $decode_data = json_decode($data);
+
+    $entity_data = \Drupal::entityManager()
+      ->getStorage($decode_data->entity_type)
+      ->load($decode_data->entity_id);
+    $field_name = $decode_data->field_name;
+
     if ($clicked == 'like') {
-      $entity_data = \Drupal::entityManager()
-        ->getStorage($decode_data->entity_type)
-        ->load($decode_data->entity_id);
-      $values = [
-        'und' => [
-          0 => [
-            'like' => 12,
-            'dislike' => 1
-          ],
-        ],
-      ];
-      //$entity_data->set($decode_data->field_name, $values);
-      //$entity_data->set($decode_data->field_name['dislike'], 123);
-      //$entity_data->save();
+      $entity_data->$field_name->likes++;
     }
     elseif ($clicked == 'dislike') {
-
+      $entity_data->$field_name->dislikes--;
     }
-    return [
-      '#type' => 'markup',
-      '#markup' => $data
-    ];
+
+    $existing_users = json_decode($entity_data->$field_name->clicked_by);
+    $existing_users = ($existing_users != NULL) ? $existing_users : new \stdClass();
+    $user = (int) $decode_data->uid;
+    $ajax_response = new AjaxResponse();
+    if (!array_key_exists($user, (array) $existing_users)) {
+      $existing_users->$user = $user;
+      $entity_data->$field_name->clicked_by = json_encode($existing_users);
+      $entity_data->save();
+
+      return $ajax_response->addCommand(new HtmlCommand('#like', 'karthik like/dislike..!'));
+    }
+    else {
+      return $ajax_response->addCommand(new HtmlCommand('#like', 'karthik already liked/disliked :('));
+    }
   }
 
 }

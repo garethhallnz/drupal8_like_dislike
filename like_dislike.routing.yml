@@ -1,7 +1,6 @@
 like_dislike.manager:
-  path: 'like-dislike/{clicked}/{data}'
+  path: like-dislike/{clicked}/{data}
   defaults:
     _controller: '\Drupal\like_dislike\Controller\LikeDislikeController::handler'
-    _title: 'likedislike'
   requirements:
     _permission: 'access content'
