@@ -72,7 +72,7 @@ class LikeDislikeFormatter extends FormatterBase {
       $initial_data['dislikes'] = $items[$delta]->dislikes;
     }
 
-    $data = json_encode($initial_data);
+    $data = base64_encode(json_encode($initial_data));
     $like_url = Url::fromRoute(
       'like_dislike.manager', ['clicked' => 'like', 'data' => $data]
     )->toString();

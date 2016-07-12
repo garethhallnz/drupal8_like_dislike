@@ -22,7 +22,7 @@ class LikeDislikeController extends ControllerBase {
    * Like or Dislike handler.
    */
   public function handler($clicked, $data) {
-    $decode_data = json_decode($data);
+    $decode_data = json_decode(base64_decode($data));
 
     $entity_data = \Drupal::entityManager()
       ->getStorage($decode_data->entity_type)
