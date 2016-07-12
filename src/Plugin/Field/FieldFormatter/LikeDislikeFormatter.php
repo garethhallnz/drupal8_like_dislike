@@ -63,9 +63,7 @@ class LikeDislikeFormatter extends FormatterBase {
     $initial_data = [
       'entity_type' => $entity->getEntityTypeId(),
       'entity_id' => $entity->id(),
-      'bundle' => $entity->bundle(),
       'field_name' => $items->getFieldDefinition()->getName(),
-      'uid' => \Drupal::currentUser()->id(),
     ];
     foreach ($items as $delta => $item) {
       $initial_data['likes'] = $items[$delta]->likes;

@@ -40,7 +40,6 @@ class LikeDislikeWidget extends WidgetBase {
       '#title' => t('Dislikes'),
       '#type' => 'number',
       '#default_value' => isset($items[$delta]->dislikes) ? $items[$delta]->dislikes : 0,
-      '#min' => 0,
     ];
 
     return $element;

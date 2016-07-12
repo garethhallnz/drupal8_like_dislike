@@ -20,36 +20,51 @@ class LikeDislikeController extends ControllerBase {
 
   /**
    * Like or Dislike handler.
+   *
+   * @param string $clicked
+   *   Status of the click link.
+   * @param string $data
+   *   Data passed from the formatter.
+   *
+   * @return AjaxResponse|string
+   *   Response count for the like/dislike.
    */
   public function handler($clicked, $data) {
+    $return = '';
+    $response = new AjaxResponse();
+
     $decode_data = json_decode(base64_decode($data));
 
-    $entity_data = \Drupal::entityManager()
+    $entity_data = \Drupal::entityTypeManager()
       ->getStorage($decode_data->entity_type)
       ->load($decode_data->entity_id);
     $field_name = $decode_data->field_name;
 
+    $users = json_decode($entity_data->$field_name->clicked_by);
+    if ($users == NULL) {
+      $users = new \stdClass();
+      $users->default = 'default';
+    }
+    $user = \Drupal::currentUser()->id();
+
+    $already_clicked = key_exists($user, array_keys((array) $users));
     if ($clicked == 'like') {
-      $entity_data->$field_name->likes++;
+      if (!$already_clicked) {
+        $entity_data->$field_name->likes++;
+        $users->$user = 'like';
+      }
+      $return = $response->addCommand(new HtmlCommand('#like', $entity_data->$field_name->likes));
     }
     elseif ($clicked == 'dislike') {
-      $entity_data->$field_name->dislikes--;
+      if (!$already_clicked) {
+        $entity_data->$field_name->dislikes--;
+        $users->$user = "dislike";
+      }
+      $return = $response->addCommand(new HtmlCommand('#dislike', $entity_data->$field_name->dislikes));
     }
-
-    $existing_users = json_decode($entity_data->$field_name->clicked_by);
-    $existing_users = ($existing_users != NULL) ? $existing_users : new \stdClass();
-    $user = (int) $decode_data->uid;
-    $ajax_response = new AjaxResponse();
-    if (!array_key_exists($user, (array) $existing_users)) {
-      $existing_users->$user = $user;
-      $entity_data->$field_name->clicked_by = json_encode($existing_users);
-      $entity_data->save();
-
-      return $ajax_response->addCommand(new HtmlCommand('#like', 'karthik like/dislike..!'));
-    }
-    else {
-      return $ajax_response->addCommand(new HtmlCommand('#like', 'karthik already liked/disliked :('));
-    }
+    $entity_data->$field_name->clicked_by = json_encode($users);
+    $entity_data->save();
+    return $return;
   }
 
 }
