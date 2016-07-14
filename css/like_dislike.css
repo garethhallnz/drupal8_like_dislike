@@ -1,0 +1,26 @@
+.like_dislike {
+    clear: both;
+}
+.like_dislike .like, .like_dislike .dislike {
+    border: 1px solid #0071b3;
+    float: left;
+    margin: 2px 0;
+    padding: 4px;
+    text-align: center;
+    width: 100px;
+}
+.like_dislike .like a, .like_dislike .dislike a {
+    border: medium none;
+    float: left;
+    padding-left: 10px;
+}
+.like_dislike .like, .like_dislike .dislike {
+    text-align: center;
+}
+.like_dislike .like span, .like_dislike .dislike span {
+    float: right;
+    padding-right: 10px;
+}
+.like_dislike .dislike {
+    margin-left: 10px;
+}

@@ -86,6 +86,7 @@ class LikeDislikeFormatter extends FormatterBase {
       '#dislike_url' => $dislike_url,
     ];
 
+    $elements['#attached']['library'][] = 'like_dislike/like_dislike';
     $elements['#cache']['max-age'] = 0;
     return $elements;
   }
