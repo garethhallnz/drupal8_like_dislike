@@ -38,6 +38,7 @@ function like_dislike_theme() {
         'dislikes' => NULL,
         'like_url' => NULL,
         'dislike_url' => NULL,
+        'enable_ajax' => NULL,
       ),
     ),
   );

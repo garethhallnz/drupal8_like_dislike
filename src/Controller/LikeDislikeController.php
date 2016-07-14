@@ -10,6 +10,10 @@ namespace Drupal\like_dislike\Controller;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Class LikeDislikeController.
@@ -17,6 +21,32 @@ use Drupal\Core\Controller\ControllerBase;
  * @package Drupal\like_dislike\Controller
  */
 class LikeDislikeController extends ControllerBase {
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
+   * Constructs an LinkClickCountController object.
+   *
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request
+   *   The request.
+   */
+  public function __construct(RequestStack $request) {
+    $this->requestStack = $request;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('request_stack')
+    );
+  }
 
   /**
    * Like or Dislike handler.
@@ -45,7 +75,13 @@ class LikeDislikeController extends ControllerBase {
       $users = new \stdClass();
       $users->default = 'default';
     }
+
     $user = \Drupal::currentUser()->id();
+    if ($user == 0) {
+      $destination = $this->requestStack->getCurrentRequest()->get('like-dislike-redirect');
+      $url = Url::fromRoute('user.register')->toString() . '?destination=' . $destination;
+      return (new RedirectResponse($url))->send();
+    }
 
     $already_clicked = key_exists($user, array_keys((array) $users));
     if ($clicked == 'like') {
