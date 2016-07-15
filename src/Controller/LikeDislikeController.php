@@ -11,6 +11,8 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -78,16 +80,29 @@ class LikeDislikeController extends ControllerBase {
     $user = \Drupal::currentUser()->id();
     if ($user == 0) {
       $destination = $this->requestStack->getCurrentRequest()->get('like-dislike-redirect');
-
-      $content = array(
-        'content' => array(
-          '#markup' => 'My return, After login go back to this url ' . $destination,
+      user_cookie_save(['destination' => $destination]);
+      $options = array(
+        'attributes' => array(
+          'class' => array(
+            'use-ajax',
+            'login-popup-form',
+          ),
+          'data-dialog-type' => 'modal',
         ),
       );
-      $html = \Drupal::service('renderer')->render($content);
+      $user_register = Url::fromRoute('user.register')->setOptions($options);
+      $user_login = Url::fromRoute('user.login')->setOptions($options);
+      $register = Link::fromTextAndUrl(t('Register'), $user_register)->toString();
+      $login = Link::fromTextAndUrl(t('Log in'), $user_login)->toString();
+      $content = array(
+        'content' => array(
+          '#markup' => "Only logged in users are allowed to like/dislike. \n Visit ".$register ." | " . $login,
+        ),
+      );
+      $user_login_register = \Drupal::service('renderer')->render($content);
       $dialog_library['#attached']['library'][] = 'core/drupal.dialog.ajax';
       $response->setAttachments($dialog_library['#attached']);
-      return $response->addCommand(new OpenModalDialogCommand('hi', $html));
+      return $response->addCommand(new OpenModalDialogCommand('Like/Dislike', $user_login_register));
     }
 
     $already_clicked = key_exists($user, array_keys((array) $users));
