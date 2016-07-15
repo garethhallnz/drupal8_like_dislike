@@ -9,10 +9,9 @@ namespace Drupal\like_dislike\Controller;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -79,8 +78,16 @@ class LikeDislikeController extends ControllerBase {
     $user = \Drupal::currentUser()->id();
     if ($user == 0) {
       $destination = $this->requestStack->getCurrentRequest()->get('like-dislike-redirect');
-      $url = Url::fromRoute('user.register')->toString() . '?destination=' . $destination;
-      return (new RedirectResponse($url))->send();
+
+      $content = array(
+        'content' => array(
+          '#markup' => 'My return, After login go back to this url ' . $destination,
+        ),
+      );
+      $html = \Drupal::service('renderer')->render($content);
+      $dialog_library['#attached']['library'][] = 'core/drupal.dialog.ajax';
+      $response->setAttachments($dialog_library['#attached']);
+      return $response->addCommand(new OpenModalDialogCommand('hi', $html));
     }
 
     $already_clicked = key_exists($user, array_keys((array) $users));

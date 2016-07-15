@@ -21,13 +21,6 @@ function like_dislike_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_page_attachments().
- */
-function like_dislike_page_attachments(array &$attachments) {
-  $attachments['#attached']['library'][] = 'core/drupal.ajax';
-}
-
-/**
  * Implements hook_theme().
  */
 function like_dislike_theme() {
@@ -38,7 +31,7 @@ function like_dislike_theme() {
         'dislikes' => NULL,
         'like_url' => NULL,
         'dislike_url' => NULL,
-        'enable_ajax' => NULL,
+        /*'enable_ajax' => NULL,*/
       ),
     ),
   );

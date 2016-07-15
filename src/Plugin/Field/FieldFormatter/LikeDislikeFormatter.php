@@ -80,18 +80,8 @@ class LikeDislikeFormatter extends FormatterBase {
 
     $user = \Drupal::currentUser()->id();
     $destination = '';
-    $enable_ajax = 'use-ajax';
     if ($user == 0) {
       $destination = '?like-dislike-redirect=' . \Drupal::requestStack()->getCurrentRequest()->getUri();
-      $entity_data = \Drupal::entityTypeManager()
-        ->getStorage($initial_data['entity_type'])
-        ->load($initial_data['entity_id']);
-      $field_name = $initial_data['field_name'];
-      $users = json_decode($entity_data->$field_name->clicked_by);
-      $already_clicked = key_exists($user, array_keys((array) $users));
-      if ($already_clicked) {
-        $enable_ajax = '';
-      }
     }
 
     $elements[] = [
@@ -100,9 +90,9 @@ class LikeDislikeFormatter extends FormatterBase {
       '#dislikes' => $initial_data['dislikes'],
       '#like_url' => $like_url . $destination,
       '#dislike_url' => $dislike_url . $destination,
-      '#enable_ajax' => empty($enable_ajax) ? $enable_ajax : '',
     ];
 
+    $elements['#attached']['library'][] = 'core/drupal.ajax';
     $elements['#attached']['library'][] = 'like_dislike/like_dislike';
     $elements['#cache']['max-age'] = 0;
     return $elements;
