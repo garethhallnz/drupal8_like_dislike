@@ -1,5 +1,5 @@
 .like_dislike {
-    clear: both;
+    display: inline-block;
 }
 .like_dislike .like, .like_dislike .dislike {
     border: 1px solid #1d84c3;
