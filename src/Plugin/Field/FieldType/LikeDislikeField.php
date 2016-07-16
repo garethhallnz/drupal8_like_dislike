@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\like_dislike\Plugin\Field\FieldType\LikeDislikeField.
- */
-
 namespace Drupal\like_dislike\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;

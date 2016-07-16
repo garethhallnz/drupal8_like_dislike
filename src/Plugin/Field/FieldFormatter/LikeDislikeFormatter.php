@@ -1,16 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\like_dislike\Plugin\Field\FieldFormatter\LikeDislikeFormatter.
- */
-
 namespace Drupal\like_dislike\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Plugin implementation of the 'like_dislike_formatter' formatter.
@@ -24,6 +22,48 @@ use Drupal\Core\Url;
  * )
  */
 class LikeDislikeFormatter extends FormatterBase {
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
+   * Constructs an ImageFormatter object.
+   *
+   * @param string $plugin_id
+   *   The plugin_id for the formatter.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The definition of the field to which the formatter is associated.
+   * @param array $settings
+   *   The formatter settings.
+   * @param string $label
+   *   The formatter label display setting.
+   * @param string $view_mode
+   *   The view mode.
+   * @param array $third_party_settings
+   *   Any third party settings settings.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request
+   *   The request stack.
+   */
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, AccountInterface $current_user, RequestStack $request) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
+    $this->currentUser = $current_user;
+    $this->requestStack = $request;
+  }
 
   /**
    * {@inheritdoc}
@@ -60,6 +100,7 @@ class LikeDislikeFormatter extends FormatterBase {
     $entity = $items->getEntity();
     $elements = [];
 
+    // Data to be passed in the url.
     $initial_data = [
       'entity_type' => $entity->getEntityTypeId(),
       'entity_id' => $entity->id(),
@@ -69,8 +110,8 @@ class LikeDislikeFormatter extends FormatterBase {
       $initial_data['likes'] = $items[$delta]->likes;
       $initial_data['dislikes'] = $items[$delta]->dislikes;
     }
-
     $data = base64_encode(json_encode($initial_data));
+
     $like_url = Url::fromRoute(
       'like_dislike.manager', ['clicked' => 'like', 'data' => $data]
     )->toString();
@@ -78,10 +119,11 @@ class LikeDislikeFormatter extends FormatterBase {
       'like_dislike.manager', ['clicked' => 'dislike', 'data' => $data]
     )->toString();
 
-    $user = \Drupal::currentUser()->id();
+    // If user is ananomous, the append the destination back url.
+    $user = $this->currentUser->id();
     $destination = '';
     if ($user == 0) {
-      $destination = '?like-dislike-redirect=' . \Drupal::requestStack()->getCurrentRequest()->getUri();
+      $destination = '?like-dislike-redirect=' . $this->requestStack->getCurrentRequest()->getUri();
     }
 
     $elements[] = [
@@ -94,6 +136,8 @@ class LikeDislikeFormatter extends FormatterBase {
 
     $elements['#attached']['library'][] = 'core/drupal.ajax';
     $elements['#attached']['library'][] = 'like_dislike/like_dislike';
+
+    // Set the cache for the element.
     $elements['#cache']['max-age'] = 0;
     return $elements;
   }

@@ -15,8 +15,8 @@ function like_dislike_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.like_dislike':
       $output = '';
-      $output .= '<h3>' . t('like_dislike') . '</h3>';
-      $output .= '<p>' . t('like_dislike.') . '</p>';
+      $output .= '<h3>' . t('Like/Dislike') . '</h3>';
+      $output .= '<p>' . t('Add a Like and Dislike field on every entity (like content, comments etc) and Get instant statistics..') . '</p>';
       return $output;
   }
 }
@@ -46,6 +46,7 @@ function like_dislike_user_login($account) {
  * Redirect to the previous page on like/dislike.
  */
 function like_dislike_redirect_to_previous_page($status) {
+  // To be handled only if like/dislike module is installed.
   if (\Drupal::moduleHandler()->moduleExists('like_dislike')) {
     $destination = \Drupal::request()->cookies->get('Drupal_visitor_destination');
     user_cookie_save(['destination' => '']);

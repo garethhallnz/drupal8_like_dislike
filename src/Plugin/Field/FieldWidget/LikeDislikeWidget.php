@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\like_dislike\Plugin\Field\FieldWidget\LikeDislikeWidget.
- */
-
 namespace Drupal\like_dislike\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;

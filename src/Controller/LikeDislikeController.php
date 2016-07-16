@@ -1,17 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\like_dislike\Controller\LikeDislikeController.
- */
-
 namespace Drupal\like_dislike\Controller;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -31,13 +29,43 @@ class LikeDislikeController extends ControllerBase {
   protected $requestStack;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The current user service.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * Constructs an LinkClickCountController object.
    *
    * @param \Symfony\Component\HttpFoundation\RequestStack $request
-   *   The request.
+   *   The request stack.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The current user.
+   * @param \Drupal\Core\Render\RendererInterface
+   *   The renderer.
    */
-  public function __construct(RequestStack $request) {
+  public function __construct(RequestStack $request, EntityTypeManagerInterface $entity_type_manager, AccountInterface $account, RendererInterface $renderer) {
     $this->requestStack = $request;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->currentUser = $account;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -45,7 +73,10 @@ class LikeDislikeController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('request_stack')
+      $container->get('request_stack'),
+      $container->get('entity_type.manager'),
+      $container->get('current_user'),
+      $container->get('renderer')
     );
   }
 
@@ -68,7 +99,7 @@ class LikeDislikeController extends ControllerBase {
     $decode_data = json_decode(base64_decode($data));
 
     // Load the entity content.
-    $entity_data = \Drupal::entityTypeManager()
+    $entity_data = $this->entityTypeManager
       ->getStorage($decode_data->entity_type)
       ->load($decode_data->entity_id);
     $field_name = $decode_data->field_name;
@@ -80,15 +111,18 @@ class LikeDislikeController extends ControllerBase {
       $users->default = 'default';
     }
 
-    $user = \Drupal::currentUser()->id();
+    $user = $this->currentUser->id();
     // If user is ananomous, ask him to register/login.
     if ($user == 0) {
-      $destination = $this->requestStack->getCurrentRequest()->get('like-dislike-redirect');
+      $destination = $this->requestStack->getCurrentRequest()
+        ->get('like-dislike-redirect');
       user_cookie_save(['destination' => $destination]);
       $user_login_register = $this->like_dislike_login_register();
       $dialog_library['#attached']['library'][] = 'core/drupal.dialog.ajax';
       $response->setAttachments($dialog_library['#attached']);
-      return $response->addCommand(new OpenModalDialogCommand('Like/Dislike', $user_login_register));
+      return $response->addCommand(
+        new OpenModalDialogCommand('Like/Dislike', $user_login_register)
+      );
     }
 
     // Update content, based on like/dislike.
@@ -101,7 +135,9 @@ class LikeDislikeController extends ControllerBase {
       else {
         return $this->like_dislike_status($response);
       }
-      $return = $response->addCommand(new HtmlCommand('#like', $entity_data->$field_name->likes));
+      $return = $response->addCommand(
+        new HtmlCommand('#like', $entity_data->$field_name->likes)
+      );
     }
     elseif ($clicked == 'dislike') {
       if (!$already_clicked) {
@@ -111,7 +147,9 @@ class LikeDislikeController extends ControllerBase {
       else {
         return $this->like_dislike_status($response);
       }
-      $return = $response->addCommand(new HtmlCommand('#dislike', $entity_data->$field_name->dislikes));
+      $return = $response->addCommand(
+        new HtmlCommand('#dislike', $entity_data->$field_name->dislikes)
+      );
     }
     $entity_data->$field_name->clicked_by = json_encode($users);
     $entity_data->save();
@@ -139,10 +177,10 @@ class LikeDislikeController extends ControllerBase {
     $login = Link::fromTextAndUrl(t('Log in'), $user_login)->toString();
     $content = array(
       'content' => array(
-        '#markup' => "Only logged in users are allowed to like/dislike. \n Visit ".$register ." | " . $login,
+        '#markup' => "Only logged-in users are allowed to like/dislike. Visit ".$register ." | " . $login,
       ),
     );
-    return \Drupal::service('renderer')->render($content);
+    return $this->renderer->render($content);
   }
 
   /**
@@ -152,8 +190,9 @@ class LikeDislikeController extends ControllerBase {
    * @return AjaxResponse
    */
   protected function like_dislike_status(AjaxResponse $response) {
-    $return = $response->addCommand(new HtmlCommand('#like_dislike_status', 'Already liked/disliked..!'));
-    return $return;
+    return $response->addCommand(
+      new HtmlCommand('#like_dislike_status', 'Already liked/disliked..!')
+    );
   }
 
 }
