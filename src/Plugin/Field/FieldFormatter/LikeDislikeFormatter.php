@@ -6,8 +6,10 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -21,7 +23,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
  *   }
  * )
  */
-class LikeDislikeFormatter extends FormatterBase {
+class LikeDislikeFormatter extends FormatterBase implements ContainerFactoryPluginInterface {
 
   /**
    * The current user.
@@ -63,6 +65,23 @@ class LikeDislikeFormatter extends FormatterBase {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
     $this->currentUser = $current_user;
     $this->requestStack = $request;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $plugin_id,
+      $plugin_definition,
+      $configuration['field_definition'],
+      $configuration['settings'],
+      $configuration['label'],
+      $configuration['view_mode'],
+      $configuration['third_party_settings'],
+      $container->get('current_user'),
+      $container->get('request_stack')
+    );
   }
 
   /**
