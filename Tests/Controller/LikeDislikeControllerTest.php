@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\like_dislike\Tests\LikeDislikeController.
- */
-
 namespace Drupal\like_dislike\Tests;
 
 use Drupal\simpletest\WebTestBase;
