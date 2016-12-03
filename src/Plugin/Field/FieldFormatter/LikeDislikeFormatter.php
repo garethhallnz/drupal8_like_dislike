@@ -115,7 +115,7 @@ class LikeDislikeFormatter extends FormatterBase implements ContainerFactoryPlug
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items, $langcode) {
+  public function viewElements(FieldItemListInterface $items, $langcode='en') {
     $entity = $items->getEntity();
     $elements = [];
 
@@ -138,7 +138,7 @@ class LikeDislikeFormatter extends FormatterBase implements ContainerFactoryPlug
       'like_dislike.manager', ['clicked' => 'dislike', 'data' => $data]
     )->toString();
 
-    // If user is ananomous, the append the destination back url.
+    // If user is anonymous, then append the destination back url.
     $user = $this->currentUser->id();
     $destination = '';
     if ($user == 0) {
