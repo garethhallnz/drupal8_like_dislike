@@ -124,7 +124,6 @@ class LikeDislikeController extends ControllerBase {
         new OpenModalDialogCommand('Like/Dislike', $user_login_register)
       );
     }
-
     // Update content, based on like/dislike.
     $already_clicked = key_exists($user, array_keys((array) $users));
     if ($clicked == 'like') {
@@ -133,10 +132,10 @@ class LikeDislikeController extends ControllerBase {
         $users->$user = 'like';
       }
       else {
-        return $this->like_dislike_status($response);
+        return $this->like_dislike_status($response,$decode_data->entity_id);
       }
       $return = $response->addCommand(
-        new HtmlCommand('#like', $entity_data->$field_name->likes)
+        new HtmlCommand('#like-'.$decode_data->entity_id, $entity_data->$field_name->likes)
       );
     }
     elseif ($clicked == 'dislike') {
@@ -145,10 +144,10 @@ class LikeDislikeController extends ControllerBase {
         $users->$user = "dislike";
       }
       else {
-        return $this->like_dislike_status($response);
+        return $this->like_dislike_status($response, $decode_data->entity_id);
       }
       $return = $response->addCommand(
-        new HtmlCommand('#dislike', $entity_data->$field_name->dislikes)
+        new HtmlCommand('#dislike-'.$decode_data->entity_id, $entity_data->$field_name->dislikes)
       );
     }
     $entity_data->$field_name->clicked_by = json_encode($users);
@@ -187,11 +186,12 @@ class LikeDislikeController extends ControllerBase {
    * Respond with the status, if user already liked/disliked.
    *
    * @param AjaxResponse $response
+   * @param $entity_id
    * @return AjaxResponse
    */
-  protected function like_dislike_status(AjaxResponse $response) {
+  protected function like_dislike_status(AjaxResponse $response,$entity_id) {
     return $response->addCommand(
-      new HtmlCommand('#like_dislike_status', 'Already liked/disliked..!')
+      new HtmlCommand('#like_dislike_status-'.$entity_id, 'Already liked/disliked..!')
     );
   }
 

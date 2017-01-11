@@ -144,13 +144,14 @@ class LikeDislikeFormatter extends FormatterBase implements ContainerFactoryPlug
     if ($user == 0) {
       $destination = '?like-dislike-redirect=' . $this->requestStack->getCurrentRequest()->getUri();
     }
-
+    
     $elements[] = [
       '#theme' => 'like_dislike',
       '#likes' => $initial_data['likes'],
       '#dislikes' => $initial_data['dislikes'],
       '#like_url' => $like_url . $destination,
       '#dislike_url' => $dislike_url . $destination,
+      '#entity_id' => $initial_data['entity_id'],
     ];
 
     $elements['#attached']['library'][] = 'core/drupal.ajax';
