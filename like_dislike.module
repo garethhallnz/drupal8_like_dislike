@@ -25,21 +25,21 @@ function like_dislike_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_form_user_register_form_alter().
  */
 function like_dislike_form_user_register_form_alter(&$form, &$form_state) {
-  $form['actions']['submit']['#submit'][] = 'like_dislike_registration_alter';
+  // $form['actions']['submit']['#submit'][] = 'like_dislike_registration_alter';
 }
 
 /**
  * Callback function for handling redirect on registration.
  */
 function like_dislike_registration_alter($form, &$form_state) {
-  like_dislike_redirect_to_previous_page('register');
+  // like_dislike_redirect_to_previous_page('register');
 }
 
 /**
  * Implements hook_user_login().
  */
 function like_dislike_user_login($account) {
-  like_dislike_redirect_to_previous_page('');
+  // like_dislike_redirect_to_previous_page('');
 }
 
 /**
