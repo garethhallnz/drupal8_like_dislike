@@ -126,8 +126,12 @@ class LikeDislikeFormatter extends FormatterBase implements ContainerFactoryPlug
       'field_name' => $items->getFieldDefinition()->getName(),
     ];
     foreach ($items as $delta => $item) {
-      $initial_data['likes'] = $items[$delta]->likes;
-      $initial_data['dislikes'] = $items[$delta]->dislikes;
+      if (!empty($items[$delta]->likes)) {
+        $initial_data['likes'] = $items[$delta]->likes;
+      }
+      if (!empty($items[$delta]->dislikes)) {
+        $initial_data['dislikes'] = $items[$delta]->dislikes;
+      }
     }
     $data = base64_encode(json_encode($initial_data));
 
