@@ -1,0 +1,14 @@
+{
+  "name": "drupal/like_dislike",
+  "type": "drupal-module",
+  "description": "You can like and dislike things.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/like_dislike",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "http://drupal.org/project/issues/like_dislike",
+    "source": "http://cgit.drupalcode.org/like_dislike"
+  },
+  "require": { }
+}
